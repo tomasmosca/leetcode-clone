@@ -1,11 +1,16 @@
+import { authModalState } from '@/atoms/authModalAtom';
 import React from 'react';
+import { useSetRecoilState } from 'recoil';
 
 type SignupProps = {
     
 };
 
 const Signup:React.FC<SignupProps> = () => {
-    
+    const setLoginModalState = useSetRecoilState(authModalState);
+    function handleLoginModal() {
+        setLoginModalState(prev => ({...prev, type: 'login'}))
+    }
     return <form className='mt-3 px-8 pb-4'>
         <h3 className='text-2xl text-white font-medium'>Register to <span className='text-zinc-800 font-bold'>LeetClone</span></h3>
         <div>
@@ -23,7 +28,7 @@ const Signup:React.FC<SignupProps> = () => {
             </div>
             <button type='submit' className='w-full bg-zinc-800 text-white text-sm rounded-md h-9 mt-4 block hover:bg-zinc-900 transition duration-300 ease-in-out'>Register</button>
             <div className='mt-3'>
-                <label className='text-sm'>Already have an account?<a href='#' className='text-blue-700 ml-1 hover:underline'>Log In</a></label>
+                <label className='text-sm'>Already have an account?<a href='#' onClick={handleLoginModal} className='text-blue-700 ml-1 hover:underline'>Log In</a></label>
             </div>
         </div>
     </form>
