@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes slideUp {
+    from {
+        transform: translateX(-50%) translateY(-45%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(-50%);
+        opacity: 1;
+    }
+}
+
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 0.60; }
+}
+  
+.overlay-enter {
+    animation: fadeIn 0.3s forwards;
+}
+  
+
+.modal-enter {
+    animation: slideUp 0.3s forwards;
+}
+  

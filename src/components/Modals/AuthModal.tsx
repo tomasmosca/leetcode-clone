@@ -17,8 +17,8 @@ const AuthModal:React.FC<AuthModalProps> = () => {
         setModalState(({type: 'login', isOpen: false}));
     }
     return <>
-        <div className='absolute h-full w-full top-0 left-0 flex justify-center items-center bg-black opacity-60' onClick={handleCloseModal}></div>
-        <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col w-96 bg-brand-orange rounded-lg outline-none mx-5'>
+        <div className='absolute h-full w-full top-0 left-0 flex justify-center items-center bg-black opacity-60 overlay-enter' onClick={handleCloseModal}></div>
+        <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col w-96 bg-brand-orange rounded-lg outline-none mx-5 modal-enter'>
             <div className='flex w-full justify-end'>
                 <button onClick={handleCloseModal} className='flex justify-center items-center rounded-full h-6 w-6 hover:bg-zinc-800
                     text-white mx-1 my-1 transition duration-300 ease-in-out'>
