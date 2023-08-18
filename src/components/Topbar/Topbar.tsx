@@ -20,7 +20,7 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
     const setModalState = useSetRecoilState(authModalState);
     
     return <div className='bg-dark-layer-1 text-dark-gray-7 flex justify-between'>
-        <div className={`md:ml-${problemPage ? '0' : '28'}`}>
+        <div className={`${problemPage ? 'md:ml-0' : 'md:ml-28'}`}>
             <Link href='/' className='flex items-center justify-center'>
                 <Image src="/logo.png" width='150' height='150' alt='LeetClone' />
             </Link>
@@ -41,7 +41,7 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
                 </div>
             </div>
         }
-        <div className={`flex justify-center items-center space-x-4 mr-4 md:mr-${problemPage ? '0' : '28'}`}>
+        <div className={`flex justify-center items-center space-x-4 mr-4 ${problemPage ? 'md:mr-4' : 'md:mr-28'}`}>
             <div>
                 <button className='p-2 rounded-md bg-dark-fill-3 text-brand-orange outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>Premium</button>
             </div>
