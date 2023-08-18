@@ -6,28 +6,48 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import Logout from '../Buttons/Logout';
 import { useSetRecoilState } from 'recoil';
 import { authModalState } from '@/atoms/authModalAtom';
+import Timer from '../Timer/Timer';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { BsList } from 'react-icons/bs';
 
 type TopbarProps = {
-    
+    problemPage?: boolean
 };
 
-const Topbar:React.FC<TopbarProps> = () => {
+const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
 
     const [user] = useAuthState(auth);
     const setModalState = useSetRecoilState(authModalState);
     
     return <div className='bg-dark-layer-1 text-dark-gray-7 flex justify-between'>
-        <div className='md:ml-28'>
+        <div className={`md:ml-${problemPage ? '0' : '28'}`}>
             <Link href='/' className='flex items-center justify-center'>
                 <Image src="/logo.png" width='150' height='150' alt='LeetClone' />
             </Link>
         </div>
-        <div className='flex justify-center items-center space-x-4 mr-4 md:mr-28'>
+        {problemPage &&
+            <div className='flex justify-center items-center gap-4'>
+                <div className='cursor-pointer p-2.5 rounded-md bg-dark-fill-3
+                outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>
+                    <FaChevronLeft />
+                </div>
+                <Link href='/' className='flex justify-center items-center gap-2 font-medium text-dark-gray-8 cursor-pointer'>
+                    <BsList />
+                    <p className='text-sm'>Problems List</p>
+                </Link>
+                <div className='cursor-pointer p-2.5 rounded-md bg-dark-fill-3
+                outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>
+                    <FaChevronRight />
+                </div>
+            </div>
+        }
+        <div className={`flex justify-center items-center space-x-4 mr-4 md:mr-${problemPage ? '0' : '28'}`}>
             <div>
                 <button className='p-2 rounded-md bg-dark-fill-3 text-brand-orange outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>Premium</button>
             </div>
+            {problemPage && <Timer />}
             {!user ? 
-            <Link href='/auth' onClick={() => setModalState(prev => ({...prev, isOpen: true}))}>
+            <Link href='/auth' onClick={() => setModalState(prev => ({...prev, isOpen: true, type: 'login'}))}>
                 <button className='p-2 rounded-md bg-dark-fill-3 outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>Sign In</button>
             </Link> : 
             <div className='cursor-pointer group relative'>
