@@ -9,9 +9,9 @@ type WorkspaceProps = {
 const Workspace:React.FC<WorkspaceProps> = () => {
     
     return (
-        <Split className='split'>
+        <Split className='split' minSize={400}>
             <ProblemDescription />
-            <div>Code Editor</div>
+            <div className='bg-dark-layer-2 text-white'>Code Editor</div>
         </Split>
     );
 }
