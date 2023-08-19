@@ -81,6 +81,23 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = () => {
                         </div>
                     </div>
                 </div>
+                <div>
+                    <p className='text-white text-sm font-medium'>Constraints</p>
+                    <ul className='text-white ml-5 list-disc'>
+                        <li className='mt-2'>
+                            <code>2 {`<=`} nums.length {`<=`} 10^4</code>
+                        </li>
+                        <li className='mt-2'>
+                            <code>-10^9 {`<=`} nums[i] {`<=`} 10^9</code>
+                        </li>
+                        <li className='mt-2'>
+                            <code>-10^9 {`<=`} target {`<=`} 10^9</code>
+                        </li>
+                        <li className='mt-2'>
+                            <strong className='text-sm'>Only one valid answer exists.</strong>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div className='text-white bg-dark-layer-1 mt-2 rounded-md px-5 py-2.5 mb-2 cursor-pointer'>
