@@ -124,6 +124,7 @@ code {
     font-size: 15px; 
     padding: 4px 8px;
     animation: appear 200ms ease-in-out forwards;
+    z-index: 10;
   }
   
   @keyframes appear {

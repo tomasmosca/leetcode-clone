@@ -13,7 +13,7 @@ const PreferenceNav:React.FC<PreferenceNavProps> = () => {
             <div className='text-xs text-white bg-dark-fill-3 rounded py-2 px-3 cursor-pointer hover:bg-dark-fill-2 transition duration-200 ease-in-out'>
                 JavaScript
             </div>
-            <div className='flex mr-2'>
+            <div className='flex'>
                 <button data-tooltip-id="my-tooltip" data-tooltip-content="Settings" data-tooltip-place="bottom" className='preferenceBtn'>
                     <AiOutlineSetting />
                 </button>
