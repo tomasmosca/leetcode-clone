@@ -52,7 +52,7 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
             </Link> : 
             <div className='cursor-pointer group relative'>
                 <Image src="/avatar.png" width='37' height='37' alt='Avatar' />
-                <div className='absolute bg-dark-layer-1 p-2 top-14 rounded-lg left-2/4 -translate-x-2/4 mx-auto shadow-lg z-40 group-hover:scale-100 scale-0 transition duration-300 ease-in-out'>
+                <div className={`absolute bg-dark-layer-1 p-2 top-14 rounded-lg ${problemPage ? '-left-2' : 'left-2/4'} -translate-x-2/4 mx-auto shadow-lg z-40 group-hover:scale-100 scale-0 transition duration-300 ease-in-out`}>
                     <p className='text-brand-orange text-sm'>{user.email}</p>
                 </div>
             </div>}

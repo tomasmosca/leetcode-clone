@@ -1,6 +1,5 @@
 import React from 'react';
 import { AiOutlineFullscreen, AiOutlineSetting } from 'react-icons/ai';
-import { Tooltip } from 'react-tooltip';
 
 type PreferenceNavProps = {
     
@@ -22,7 +21,6 @@ const PreferenceNav:React.FC<PreferenceNavProps> = () => {
                 </button>
             </div>
         </div>
-        <Tooltip id="my-tooltip" className='tooltip-styling' arrowColor="transparent" offset={8}/>
     </div>
 }
 export default PreferenceNav;

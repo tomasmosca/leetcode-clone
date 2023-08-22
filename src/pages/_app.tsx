@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app'
 import Head from "next/head"
 import { ToastContainer } from 'react-toastify';
 import { RecoilRoot } from 'recoil';
+import { Tooltip } from 'react-tooltip';
 
 export default function App({ Component, pageProps }: AppProps) {
   return <RecoilRoot>
@@ -15,7 +16,10 @@ export default function App({ Component, pageProps }: AppProps) {
 					content='Web application that contains leetcode problems and video solutions'
 				/>
 			</Head>
-      		<Component {...pageProps} />
-			<ToastContainer/>
- 	 </RecoilRoot>
+			<div className='app-wrapper'>
+				<Component {...pageProps} />
+				<ToastContainer/>
+				<Tooltip id="my-tooltip" className='tooltip-styling' arrowColor="transparent" offset={8}/>
+			</div>
+ 		</RecoilRoot>
 }

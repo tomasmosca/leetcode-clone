@@ -2,6 +2,8 @@ import React from 'react';
 import { AiFillDislike, AiFillLike } from 'react-icons/ai';
 import { BsCheck2Circle } from 'react-icons/bs';
 import { TiStarOutline } from 'react-icons/ti';
+import Split from 'react-split';
+import Console from './Console/Console';
 
 type ProblemDescriptionProps = {
     
@@ -9,18 +11,18 @@ type ProblemDescriptionProps = {
 
 const ProblemDescription:React.FC<ProblemDescriptionProps> = () => {
     
-    return <div className='bg-dark-layer-2 h-[calc(100vh-67px)] flex flex-col pl-2'>
+    return <div className='bg-dark-layer-2 h-[calc(100vh-67px)] flex flex-col pl-2 pb-2.5'>
         <div className='flex'>
             <p className='text-white text-xs font-light bg-dark-layer-1 rounded-t-md p-3 mt-2 px-5'>Description</p>
         </div>
-        <div className='flex-grow overflow-y-auto overflow-hidden rounded-e-md rounded-bl-md'>
-            <div className='bg-dark-layer-1 w-full p-5'>
+        <Split className='flex-grow overflow-hidden' sizes={[70, 30]} direction="vertical" minSize={180}>
+            <div className='bg-dark-layer-1 w-full p-5 overflow-y-auto rounded-e-md rounded-bl-md'>
                 <h1 className="text-white text-lg font-medium">1. Two Sum</h1>
                 <div className='flex items-center mt-3 space-x-4'>
                     <div className='text-xs text-olive bg-olive rounded-[21px] bg-opacity-[.15] px-2 py-1 font-medium capitalize'>
                         Easy
                     </div>
-                    <div className='rounded transition-colors duration-200 text-green-s text-dark-green-s text-lg'>
+                    <div data-tooltip-id="my-tooltip" data-tooltip-content="Solved" data-tooltip-place="bottom" className='rounded transition-colors duration-200 text-green-s text-dark-green-s text-lg'>
                         <BsCheck2Circle />
                     </div>
                     <div className='flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg'>
@@ -31,7 +33,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = () => {
                         <AiFillDislike />
                         <span className='text-xs'>20</span>
                     </div>
-                    <div className='text-dark-gray-6 cursor-pointer rounded hover:bg-dark-fill-3 p-[3px] transition-colors duration-200 text-xl'>
+                    <div data-tooltip-id="my-tooltip" data-tooltip-content="Add to List" data-tooltip-place="bottom" className='text-dark-gray-6 cursor-pointer rounded hover:bg-dark-fill-3 p-[3px] transition-colors duration-200 text-xl'>
                         <TiStarOutline />
                     </div>
                 </div>
@@ -99,10 +101,8 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = () => {
                     </ul>
                 </div>
             </div>
-        </div>
-        <div className='text-white bg-dark-layer-1 mt-2 rounded-md px-5 py-2.5 mb-2 cursor-pointer'>
-            <p className=''>Console</p>
-        </div>
+            <Console />
+        </Split>
     </div>
 }
 export default ProblemDescription;

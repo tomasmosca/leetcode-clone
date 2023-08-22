@@ -59,18 +59,18 @@ const Timer:React.FC<TimerProps> = () => {
     return <div onClick={!showTimer ? startTimer : undefined}>
             {showTimer ? 
                 <div className='flex p-1.5 justify-center items-center gap-2 cursor-pointer bg-dark-fill-2 rounded-md'>
-                    <div onClick={hideTimerDisplay} className='hover:text-dark-gray-8 flex space-x-1'>
+                    <div data-tooltip-id="my-tooltip" data-tooltip-content="Hide timer" data-tooltip-place="bottom" onClick={hideTimerDisplay} className='hover:text-dark-gray-8 flex space-x-1'>
                         <span className='w-6 text-center'>{hours.toString().padStart(2, '0')}</span>
                         <span>:</span>
                         <span className='w-6 text-center'>{minutes.toString().padStart(2, '0')}</span>
                         <span>:</span>
                         <span className='w-6 text-center'>{secs.toString().padStart(2, '0')}</span>
                     </div>
-                    <div onClick={resetTimer} className='hover:text-dark-gray-8'>
+                    <div data-tooltip-id="my-tooltip" data-tooltip-content="Reset timer" data-tooltip-place="bottom" onClick={resetTimer} className='hover:text-dark-gray-8'>
                         <FiRefreshCcw />
                     </div>
                 </div> : 
-                <div className={`cursor-pointer p-1.5 rounded-md ${timerStarted ? 'text-dark-blue-s' : ''} outline-none text-sm hover:bg-dark-fill-2 transition-all duration-300 ease-in-out transition-text-none`}>
+                <div data-tooltip-id="my-tooltip" data-tooltip-content={`${timerStarted ? 'Show timer' : 'Start timer'}`} data-tooltip-place="bottom" className={`cursor-pointer p-1.5 rounded-md ${timerStarted ? 'text-dark-blue-s' : ''} outline-none text-sm hover:bg-dark-fill-2 transition-all duration-300 ease-in-out transition-text-none`}>
                     <svg
                         xmlns='http://www.w3.org/2000/svg'
                         viewBox='0 0 24 24'

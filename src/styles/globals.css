@@ -117,22 +117,21 @@ code {
 	font-size: 1rem;
 }
 
-.editor-container .tooltip-styling {
+.app-wrapper .tooltip-styling {
     background-color: rgb(250, 250, 239);
     color: black;
     border-radius: 5px;
     font-size: 15px; 
     padding: 4px 8px;
     animation: appear 200ms ease-in-out forwards;
-    z-index: 10;
   }
   
-  @keyframes appear {
+@keyframes appear {
     from {
-      transform: scale(0.8);
+        transform: scale(0.8);
     }
     to {
-      transform: scale(1);
+        transform: scale(1);
     }
-  }
+}
   
