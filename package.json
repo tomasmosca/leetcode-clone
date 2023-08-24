@@ -15,6 +15,7 @@
     "@types/react-dom": "18.2.7",
     "@uiw/codemirror-theme-vscode": "^4.21.9",
     "@uiw/react-codemirror": "^4.21.9",
+    "assert": "^2.0.0",
     "autoprefixer": "10.4.14",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
