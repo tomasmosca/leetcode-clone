@@ -4,12 +4,13 @@ import { BsCheck2Circle } from 'react-icons/bs';
 import { TiStarOutline } from 'react-icons/ti';
 import Split from 'react-split';
 import Console from './Console/Console';
+import { Problem } from '@/utils/types/problems'
 
 type ProblemDescriptionProps = {
-    
+    problem: Problem
 };
 
-const ProblemDescription:React.FC<ProblemDescriptionProps> = () => {
+const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
     
     return <div className='bg-dark-layer-2 h-[calc(100vh-67px)] flex flex-col pl-2 pb-2.5'>
         <div className='flex'>
@@ -17,7 +18,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = () => {
         </div>
         <Split className='flex-grow overflow-hidden' sizes={[70, 30]} direction="vertical" minSize={180}>
             <div className='bg-dark-layer-1 w-full p-5 overflow-y-auto rounded-e-md rounded-bl-md'>
-                <h1 className="text-white text-lg font-medium">1. Two Sum</h1>
+                <h1 className="text-white text-lg font-medium">{problem.title}</h1>
                 <div className='flex items-center mt-3 space-x-4'>
                     <div className='text-xs text-olive bg-olive rounded-[21px] bg-opacity-[.15] px-2 py-1 font-medium capitalize'>
                         Easy
@@ -38,70 +39,37 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = () => {
                     </div>
                 </div>
                 <div className='text-white text-sm'>
-                    <p className='mt-3'>
-                        Given an array of integers <code>nums</code> and an integer <code>target</code>, return <em>indices of the two numbers
-                        such that they add up to</em> <code>target</code>.
-                    </p>
-                    <p className='mt-3'>
-                        You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the same element twice.
-                    </p>
-                    <p className='mt-3'>
-                        You can return the answer in any order.
-                    </p>
+                    <div dangerouslySetInnerHTML={{__html: problem.problemStatement}}></div>
                 </div>
                 <div className='mt-4'>
-                    <div>
-                        <p className='text-white font-medium'>Example 1:</p>
-                        <div className='example-card'>
-                            <pre>
-                                <strong>Input:  </strong>nums = [2,7,11,15], target = 9
-                                <br />
-                                <strong>Output: </strong>[0,1]
-                                <br />
-                                <strong>Explanation: </strong>Because nums[0] + nums[1] == 9, we return [0, 1].
-                            </pre>
-                        </div>
-                        <p className='text-white font-medium'>Example 2:</p>
-                        <div className='example-card'>
-                            <pre>
-                                <strong>Input:  </strong>nums = [2,7,11,15], target = 9
-                                <br />
-                                <strong>Output: </strong>[0,1]
-                                <br />
-                                <strong>Explanation: </strong>Because nums[0] + nums[1] == 9, we return [0, 1].
-                            </pre>
-                        </div>
-                        <p className='text-white font-medium'>Example 3:</p>
-                        <div className='example-card'>
-                            <pre>
-                                <strong>Input:  </strong>nums = [2,7,11,15], target = 9
-                                <br />
-                                <strong>Output: </strong>[0,1]
-                                <br />
-                                <strong>Explanation: </strong>Because nums[0] + nums[1] == 9, we return [0, 1].
-                            </pre>
-                        </div>
-                    </div>
+                    {problem.examples.map((example, index) => {
+                        return (
+                            <div key={example.id}>
+                                <p className='text-white font-medium'>Example {index + 1}:</p>
+                                {example.img && <img src={example.img} alt='' className='mt-3'></img>}
+                                <div className='example-card'>
+                                    <pre>
+                                        <strong>Input:  </strong>{example.inputText}
+                                        <br />
+                                        <strong>Output: </strong>{example.outputText}
+                                        <br />
+                                        {example.explanation && (<>
+                                            <strong>Explanation: </strong>{example.explanation}
+                                        </>)}
+                                    </pre>
+                                </div>
+                            </div>
+                        )
+                    })}
                 </div>
                 <div>
                     <p className='text-white text-sm font-medium'>Constraints</p>
                     <ul className='text-white ml-5 list-disc'>
-                        <li className='mt-2'>
-                            <code>2 {`<=`} nums.length {`<=`} 10^4</code>
-                        </li>
-                        <li className='mt-2'>
-                            <code>-10^9 {`<=`} nums[i] {`<=`} 10^9</code>
-                        </li>
-                        <li className='mt-2'>
-                            <code>-10^9 {`<=`} target {`<=`} 10^9</code>
-                        </li>
-                        <li className='mt-2'>
-                            <strong className='text-sm'>Only one valid answer exists.</strong>
-                        </li>
+                        <div dangerouslySetInnerHTML={{__html: problem.constraints}}></div>
                     </ul>
                 </div>
             </div>
-            <Console />
+            <Console problem={problem} />
         </Split>
     </div>
 }

@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BsChevronUp } from 'react-icons/bs';
+import { Problem } from '@/utils/types/problems'
 
 type ConsoleProps = {
-    
+    problem: Problem
 };
 
-const Console:React.FC<ConsoleProps> = () => {
+const Console:React.FC<ConsoleProps> = ({ problem }) => {
+
+    const [testIndex, setTestIndex] = useState<number>(0);
     
     return (
         <div className='flex flex-col w-full px-5 overflow-auto bg-dark-layer-1 rounded-md'>
@@ -21,31 +24,25 @@ const Console:React.FC<ConsoleProps> = () => {
                 <div className='flex flex-col flex-grow'>
                         <div className='mr-2 items-start mt-4 '>
                             <div className='flex flex-wrap items-center gap-y-4 space-x-2'>
-                                <div
-                                    className={`font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3 hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap text-white`}
-                                >
-                                    Case 1
-                                </div>
-                                <div
-                                    className={`font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3 hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap text-white`}
-                                >
-                                    Case 2
-                                </div>
-                                <div
-                                    className={`font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3 hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap text-white`}
-                                >
-                                    Case 3
-                                </div>
+                                {problem.examples.map((example, index) => {
+                                    return (
+                                        <div key={example.id} onClick={() => setTestIndex(index)}
+                                    className={`font-medium items-center transition-all focus:outline-none inline-flex ${index === testIndex ? "bg-dark-fill-3" : ""} hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap text-white`}
+                                        >
+                                            Case {index + 1}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                         <div className='font-semibold my-4'>
                             <p className='text-sm font-medium text-white'>Input:</p>
                             <div className='w-full cursor-text rounded-lg border px-3 py-[10px] bg-dark-fill-3 border-transparent text-white mt-2'>
-                                [7,2,5,1]
+                                {problem.examples[testIndex].inputText}
                             </div>
                             <p className='text-sm font-medium mt-4 text-white'>Output:</p>
                             <div className='w-full cursor-text rounded-lg border px-3 py-[10px] bg-dark-fill-3 border-transparent text-white mt-2'>
-                                9
+                                {problem.examples[testIndex].outputText}
                             </div>
                         </div>
                 </div>
