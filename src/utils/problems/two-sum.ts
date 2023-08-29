@@ -3,7 +3,7 @@ import { Problem } from '@/utils/types/problems'
 
 const starterCodeTwoSum = `function twoSum(nums,target){
     // Write your code here
-  };`;
+};`;
 
 // checks if the user has the correct code
 const handlerTwoSum = (fn: any) => {

@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { problems } from '@/mockProblems/problems';
+import React, { useEffect, useState } from 'react';
 import { BsCheckCircle } from "react-icons/bs"
 import { AiFillYoutube } from "react-icons/ai"
 import Link from 'next/link';
 import { IoClose } from 'react-icons/io5';
 import YouTube from 'react-youtube';
+import Skeleton from 'react-loading-skeleton'
+import { collection, orderBy, query, getDocs } from 'firebase/firestore';
+import { firstore } from '@/firebase/firebase'
+import { DBProblem } from '@/utils/types/problems'
 
 type ProblemsTableProps = {
     
@@ -24,17 +27,32 @@ const ProblemsTable:React.FC<ProblemsTableProps> = () => {
     const handleChangeVideoId = (id: string) => {
         setYoutubePlayer({ isOpen: true, videoId: id})
     }
+
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const problems = useGetProblems(setIsLoading);
     
     return <>
         <tbody className='text-white'>
-            {problems.map((problem, idx) => {
+            {isLoading
+                ? Array.from({ length: 10 }).map((_, index) => (
+                    <tr key={index}>
+                        <th className='px-2 py-4'>
+                            <Skeleton circle={true} height={20} width={20} />
+                        </th>
+                        <td className='px-6 py-4'><Skeleton width={100} height={17} borderRadius={10} /></td>
+                        <td className='px-6 py-4'><Skeleton width={50} height={17} borderRadius={10} /></td>
+                        <td className='px-6 py-4'><Skeleton width={50} height={17} borderRadius={10} /></td>
+                        <td className='px-6 py-4'><Skeleton width={30} height={17} borderRadius={10} /></td>
+                    </tr>
+                    ))
+                : problems.map((problem, idx) => {
                 return (
                     <tr key={problem.id} className={`${idx % 2 == 1 ? "bg-dark-layer-1" : ""}`}>
                         <th className='px-2 py-4 font-medium whitespace-nowrap text-dark-green-s'>
                             <BsCheckCircle fontSize={"18"} width='18' />
                         </th>
                         <td className='px-6 py-4'>
-                            <Link className='hover:text-blue-600 cursor-pointer' href={`/problems/${problem.id}`}>
+                            <Link className='hover:text-blue-600 cursor-pointer' href={`${problem.link ? problem.link : '/problems/' + problem.id}`}>
                                 {problem.order + '. ' + problem.title}
                             </Link>
                         </td>
@@ -77,3 +95,26 @@ const ProblemsTable:React.FC<ProblemsTableProps> = () => {
     </>
 }
 export default ProblemsTable;
+
+function useGetProblems(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) {
+    const [problems, setProblems] = useState<DBProblem[]>([]);
+
+    useEffect(() => {
+
+        const getProblems = async () => {
+            setIsLoading(true)
+            const q = query(collection(firstore, "problems"), orderBy("order", "asc"));
+            const querySnapshot = await getDocs(q);
+            const temp: DBProblem[] = []
+            querySnapshot.forEach((doc) => {
+                temp.push({id: doc.id, ...doc.data()} as DBProblem)
+            });
+            setProblems(temp);
+            setIsLoading(false);
+        }
+
+        getProblems();
+    }, [setIsLoading])
+
+    return problems;
+}

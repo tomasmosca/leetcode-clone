@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AiFillDislike, AiFillLike } from 'react-icons/ai';
 import { BsCheck2Circle } from 'react-icons/bs';
 import { TiStarOutline } from 'react-icons/ti';
@@ -11,6 +11,8 @@ type ProblemDescriptionProps = {
 };
 
 const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
+
+    const [isConsoleOpen, setConsoleOpen] = useState(true);
     
     return <div className='bg-dark-layer-2 h-[calc(100vh-67px)] flex flex-col pl-2 pb-2.5'>
         <div className='flex'>
@@ -69,7 +71,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                     </ul>
                 </div>
             </div>
-            <Console problem={problem} />
+            <Console problem={problem} setConsoleOpen={setConsoleOpen}/>
         </Split>
     </div>
 }

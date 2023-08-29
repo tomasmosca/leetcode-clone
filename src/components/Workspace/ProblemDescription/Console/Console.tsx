@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { BsChevronUp } from 'react-icons/bs';
+import { BsChevronDown } from 'react-icons/bs';
 import { Problem } from '@/utils/types/problems'
 
 type ConsoleProps = {
-    problem: Problem
+    problem: Problem,
+    setConsoleOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const Console:React.FC<ConsoleProps> = ({ problem }) => {
+const Console:React.FC<ConsoleProps> = ({ problem, setConsoleOpen }) => {
 
     const [testIndex, setTestIndex] = useState<number>(0);
     
@@ -47,9 +48,9 @@ const Console:React.FC<ConsoleProps> = ({ problem }) => {
                         </div>
                 </div>
                 <div className='flex-none sticky bottom-0 z-10 flex h-12 items-center justify-between space-x-6 bg-dark-layer-1'>
-                    <div className='flex items-center transition-all cursor-pointer rounded-lg bg-dark-fill-3 hover:bg-dark-fill-2 text-dark-label-2 text-sm font-medium px-4 py-1.5'>
+                    <div onClick={() => setConsoleOpen(false)} className='flex items-center transition-all cursor-pointer rounded-lg bg-dark-fill-3 hover:bg-dark-fill-2 text-dark-label-2 text-sm font-medium px-4 py-1.5'>
                         Console
-                        <BsChevronUp className='ml-2 fill-dark-gray-6 fill-gray-6'/>
+                        <BsChevronDown className='ml-2 fill-dark-gray-6 fill-gray-6'/>
                     </div>
                     <div className='flex space-x-2'>
                         <div className='transition-all cursor-pointer rounded-lg bg-dark-fill-3 hover:bg-dark-fill-2 text-dark-label-2 text-sm font-medium px-4 py-1.5'>

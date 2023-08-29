@@ -1,3 +1,5 @@
+import 'react-loading-skeleton/dist/skeleton.css'
+import { SkeletonTheme } from 'react-loading-skeleton';
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import Head from "next/head"
@@ -17,9 +19,11 @@ export default function App({ Component, pageProps }: AppProps) {
 				/>
 			</Head>
 			<div className='app-wrapper'>
-				<Component {...pageProps} />
-				<ToastContainer/>
-				<Tooltip id="my-tooltip" className='tooltip-styling' arrowColor="transparent" offset={8}/>
+				<SkeletonTheme baseColor="#313131" highlightColor="#525252">
+					<Component {...pageProps} />
+					<ToastContainer/>
+					<Tooltip id="my-tooltip" className='tooltip-styling' arrowColor="transparent" offset={8}/>
+				</SkeletonTheme>
 			</div>
  		</RecoilRoot>
 }
