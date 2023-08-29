@@ -8,6 +8,8 @@ import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Spinner from '../Animations/Spinner';
+import { firstore } from '@/firebase/firebase'
+import { setDoc, doc } from 'firebase/firestore';
 
 type SignupProps = {
     
@@ -38,6 +40,19 @@ const Signup:React.FC<SignupProps> = () => {
         try {
             const newUser = await createUserWithEmailAndPassword(inputs.email, inputs.password);
             if (!newUser) return;
+
+            const userData = {
+                uid: newUser.user.uid,
+                email: newUser.user.email,
+                displayName: inputs.displayName,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                likedProblems: [],
+                dislikedProblems: [],
+                solvedProblems: [],
+                starredProblems: []
+            }
+            await setDoc(doc(firstore, "users", newUser.user.uid), userData);
             router.push('/');
             toast.success("Registered successfully!", { position: "top-right", autoClose: 5000, theme: "dark", });
         } catch(error: any) {

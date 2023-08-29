@@ -45,7 +45,7 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
             <div>
                 <button className='p-2 rounded-md bg-dark-fill-3 text-brand-orange outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>Premium</button>
             </div>
-            {problemPage && <Timer />}
+            {problemPage && user && <Timer />}
             {!user ? 
             <Link href='/auth' onClick={() => setModalState(prev => ({...prev, isOpen: true, type: 'login'}))}>
                 <button className='p-2 rounded-md bg-dark-fill-3 outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>Sign In</button>

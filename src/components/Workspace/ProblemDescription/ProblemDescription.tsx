@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { AiFillDislike, AiFillLike } from 'react-icons/ai';
+import React, { useEffect, useState } from 'react';
+import { AiFillDislike, AiFillLike, AiFillStar } from 'react-icons/ai';
 import { BsCheck2Circle } from 'react-icons/bs';
 import { TiStarOutline } from 'react-icons/ti';
 import Split from 'react-split';
 import Console from './Console/Console';
-import { Problem } from '@/utils/types/problems'
+import { DBProblem, Problem } from '@/utils/types/problems'
+import { firstore } from '@/firebase/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import Skeleton from 'react-loading-skeleton'
+import { auth } from '@/firebase/firebase'
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 type ProblemDescriptionProps = {
     problem: Problem
@@ -12,7 +17,10 @@ type ProblemDescriptionProps = {
 
 const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
 
-    const [isConsoleOpen, setConsoleOpen] = useState(true);
+    const [isConsoleOpen, setConsoleOpen] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const problemData = useGetProblemData(setIsLoading, problem.id);
+    const {liked, disliked, starred, solved} = useGetUserActions(setIsLoading, problem.id);
     
     return <div className='bg-dark-layer-2 h-[calc(100vh-67px)] flex flex-col pl-2 pb-2.5'>
         <div className='flex'>
@@ -21,23 +29,43 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
         <Split className='flex-grow overflow-hidden' sizes={[70, 30]} direction="vertical" minSize={180}>
             <div className='bg-dark-layer-1 w-full p-5 overflow-y-auto rounded-e-md rounded-bl-md'>
                 <h1 className="text-white text-lg font-medium">{problem.title}</h1>
-                <div className='flex items-center mt-3 space-x-4'>
-                    <div className='text-xs text-olive bg-olive rounded-[21px] bg-opacity-[.15] px-2 py-1 font-medium capitalize'>
-                        Easy
+                <div className='flex items-center mt-3 space-x-4 min-h-[40px]'>
+                    <div className={`text-xs ${problemData?.difficulty === 'Easy' ? "text-olive bg-olive" :
+                     problemData?.difficulty === 'Medium' ? "bg-dark-yellow text-dark-yellow" : problemData?.difficulty === 'Hard' ?
+                      "bg-dark-pink text-dark-pink" : ""} rounded-[21px] bg-opacity-[.15] ${problemData?.difficulty ? "px-2 py-1" : ""} font-medium capitalize`}>
+                        {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : problemData?.difficulty}
                     </div>
-                    <div data-tooltip-id="my-tooltip" data-tooltip-content="Solved" data-tooltip-place="bottom" className='rounded transition-colors duration-200 text-green-s text-dark-green-s text-lg'>
-                        <BsCheck2Circle />
+                    {isLoading ? <Skeleton circle={true} height={20} width={20} /> : 
+                        (solved && 
+                            <div data-tooltip-id="my-tooltip" data-tooltip-content="Solved" data-tooltip-place="bottom" className='rounded transition-colors duration-200 text-green-s text-dark-green-s text-lg'>
+                                <BsCheck2Circle />
+                            </div>
+                        )
+                    }
+                    <div className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
+                        {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
+                        <>
+
+                            {liked ? <AiFillLike className="text-dark-blue-s" /> : <AiFillLike />}
+                            <span className='text-xs'>{problemData?.likes}</span>
+                        </>
+                        )}
                     </div>
-                    <div className='flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg'>
-                        <AiFillLike />
-                        <span className='text-xs'>120</span>
-                    </div>
-                    <div className='flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg'>
-                        <AiFillDislike />
-                        <span className='text-xs'>20</span>
+                    <div className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
+                        {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
+                            <>
+                                {disliked ? <AiFillDislike className="text-dark-blue-s" /> : <AiFillDislike />}
+                                <span className='text-xs'>{problemData?.dislikes}</span>
+                            </>
+                        )}
                     </div>
                     <div data-tooltip-id="my-tooltip" data-tooltip-content="Add to List" data-tooltip-place="bottom" className='text-dark-gray-6 cursor-pointer rounded hover:bg-dark-fill-3 p-[3px] transition-colors duration-200 text-xl'>
-                        <TiStarOutline />
+                        {isLoading ? <Skeleton circle={true} height={20} width={20} /> : 
+                        (
+                            <>
+                                {starred ? <AiFillStar className="text-dark-yellow" /> : <TiStarOutline />}
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className='text-white text-sm'>
@@ -76,3 +104,48 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
     </div>
 }
 export default ProblemDescription;
+
+function useGetProblemData(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, problemId: string) {
+    const [problemData, setProblemData] = useState<DBProblem>();
+
+    useEffect(() => {
+        const getCurrentProblem = async () => {
+            setIsLoading(true);
+            const docRef = doc(firstore, "problems", problemId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const problem = docSnap.data();
+                setProblemData({id: docSnap.id, ...docSnap.data()} as DBProblem);
+            }
+        }
+        getCurrentProblem();
+    }, [problemId, setIsLoading]);
+
+    return problemData;
+}
+
+function useGetUserActions(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, problemId: string) {
+    const [userData, setUserData] = useState({liked: false, disliked: false, starred: false, solved: false});
+    const [user] = useAuthState(auth);
+
+    useEffect(() => {
+        const getUserData = async () => {
+
+            const docRef = doc(firstore, "users", user!.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setUserData({
+                    liked: data.likedProblems.includes(problemId),
+                    disliked: data.dislikedProblems.includes(problemId),
+                    starred: data.starredProblems.includes(problemId),
+                    solved: data.solvedProblems.includes(problemId)
+                });
+            }
+            setIsLoading(false);
+        }
+        if (user) getUserData();
+    }, [problemId, setIsLoading, user])
+
+    return userData;
+}
