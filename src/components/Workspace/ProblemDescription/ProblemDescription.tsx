@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { AiFillDislike, AiFillLike, AiFillStar } from 'react-icons/ai';
+import { AiFillDislike, AiFillLike, AiFillStar, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BsCheck2Circle } from 'react-icons/bs';
 import { TiStarOutline } from 'react-icons/ti';
 import Split from 'react-split';
 import Console from './Console/Console';
 import { DBProblem, Problem } from '@/utils/types/problems'
 import { firstore } from '@/firebase/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, runTransaction } from 'firebase/firestore';
 import Skeleton from 'react-loading-skeleton'
 import { auth } from '@/firebase/firebase'
 import { useAuthState } from 'react-firebase-hooks/auth';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 type ProblemDescriptionProps = {
     problem: Problem
@@ -19,8 +21,64 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
 
     const [isConsoleOpen, setConsoleOpen] = useState<boolean>(true);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const problemData = useGetProblemData(setIsLoading, problem.id);
-    const {liked, disliked, starred, solved} = useGetUserActions(setIsLoading, problem.id);
+    const {problemData, setProblemData} = useGetProblemData(setIsLoading, problem.id);
+    const {liked, disliked, starred, solved, setUserData} = useGetUserActions(setIsLoading, problem.id);
+    const [user] = useAuthState(auth);
+    const [updating, setUpdating] = useState<boolean>(false);
+
+    const handleLike = async() => {
+        if (!user) {
+            toast.error("Please log in to like the problem", { position: "top-right", autoClose: 5000, theme: "dark", });
+            return;
+        }
+        if (updating) {return;}
+        setUpdating(true);
+        await runTransaction(firstore, async(transaction) => {
+            const userRef = doc(firstore, "users", user.uid);
+            const problemRef = doc(firstore, "problems", problem.id);
+            const userDoc = await transaction.get(userRef);
+            const problemDoc = await transaction.get(problemRef);
+            if (userDoc.exists() && problemDoc.exists()) {
+                if (liked) {
+                    transaction.update(userRef,{
+                            likedProblems: userDoc.data().likedProblems.filter((id: string) => id !== problem.id)
+                        }
+                     );
+                    transaction.update(problemRef, {
+                            likes: problemDoc.data().likes - 1
+                        }
+                    )
+                    setProblemData(prev => prev ? {...prev, likes: prev.likes - 1} : null);
+                    setUserData(prev => ({...prev, liked: false}));
+                } else if (disliked) {
+                    transaction.update(userRef, {
+                            likedProblems: [...userDoc.data().likedProblems, problem.id],
+                            dislikedProblems: userDoc.data().dislikedProblems.filter((id: string) => id !== problem.id)
+                        }
+                    )
+                    transaction.update(problemRef, {
+                            likes: problemDoc.data().likes + 1,
+                            disliked: problemDoc.data().dislikes - 1
+                        }
+                    )
+                    setProblemData(prev => prev ? {...prev, likes: prev.likes + 1, dislikes: prev.dislikes - 1} : null);
+                    setUserData(prev => ({...prev, liked: true, disliked: false}));
+                } else {
+                    transaction.update(userRef, {
+                            likedProblems: [...userDoc.data().likedProblems, problem.id]
+                        }
+                    )
+                    transaction.update(problemRef, {
+                            likes: problemDoc.data().likes + 1
+                        }
+                    )
+                    setProblemData(prev => prev ? {...prev, likes: prev.likes + 1} : null);
+                    setUserData(prev => ({...prev, liked: true}));
+                }
+            }
+        });
+        setUpdating(false);
+    }
     
     return <div className='bg-dark-layer-2 h-[calc(100vh-67px)] flex flex-col pl-2 pb-2.5'>
         <div className='flex'>
@@ -42,11 +100,11 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                             </div>
                         )
                     }
-                    <div className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
+                    <div onClick={handleLike} className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
                         <>
 
-                            {liked ? <AiFillLike className="text-dark-blue-s" /> : <AiFillLike />}
+                            {liked && !updating ? <AiFillLike className="text-dark-blue-s" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <AiFillLike />}
                             <span className='text-xs'>{problemData?.likes}</span>
                         </>
                         )}
@@ -106,7 +164,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
 export default ProblemDescription;
 
 function useGetProblemData(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, problemId: string) {
-    const [problemData, setProblemData] = useState<DBProblem>();
+    const [problemData, setProblemData] = useState<DBProblem | null>();
 
     useEffect(() => {
         const getCurrentProblem = async () => {
@@ -121,7 +179,7 @@ function useGetProblemData(setIsLoading: React.Dispatch<React.SetStateAction<boo
         getCurrentProblem();
     }, [problemId, setIsLoading]);
 
-    return problemData;
+    return {problemData, setProblemData};
 }
 
 function useGetUserActions(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, problemId: string) {
@@ -147,5 +205,5 @@ function useGetUserActions(setIsLoading: React.Dispatch<React.SetStateAction<boo
         if (user) getUserData();
     }, [problemId, setIsLoading, user])
 
-    return userData;
+    return {...userData, setUserData};
 }
