@@ -6,7 +6,7 @@ import Split from 'react-split';
 import Console from './Console/Console';
 import { DBProblem, Problem } from '@/utils/types/problems'
 import { firstore } from '@/firebase/firebase';
-import { doc, getDoc, runTransaction } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, doc, getDoc, runTransaction, updateDoc } from 'firebase/firestore';
 import Skeleton from 'react-loading-skeleton'
 import { auth } from '@/firebase/firebase'
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -135,6 +135,29 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
         });
         setUpdating(false);
     }
+
+    const handleStar = async() => {
+        if (!user) {
+            toast.error("Please log in to star the problem", { position: "top-right", autoClose: 5000, theme: "dark", });
+            return;
+        }
+        if (updating) {return;}
+        setUpdating(true);
+        if (!starred) {
+            const userRef = doc(firstore, "users", user.uid);
+            await updateDoc(userRef, {
+                starredProblems: arrayUnion(problem.id)
+            });
+            setUserData(prev => ({...prev, starred: true}));
+        } else {
+            const userRef = doc(firstore, "users", user.uid);
+            await updateDoc(userRef, {
+                starredProblems: arrayRemove(problem.id)
+            });
+            setUserData(prev => ({...prev, starred: false}));
+        }
+        setUpdating(false);
+    }
     
     return <div className='bg-dark-layer-2 h-[calc(100vh-67px)] flex flex-col pl-2 pb-2.5'>
         <div className='flex'>
@@ -173,11 +196,11 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                             </>
                         )}
                     </div>
-                    <div data-tooltip-id="my-tooltip" data-tooltip-content="Add to List" data-tooltip-place="bottom" className='text-dark-gray-6 cursor-pointer rounded hover:bg-dark-fill-3 p-[3px] transition-colors duration-200 text-xl'>
+                    <div onClick={handleStar} data-tooltip-id="my-tooltip" data-tooltip-content="Add to List" data-tooltip-place="bottom" className='text-dark-gray-6 cursor-pointer rounded hover:bg-dark-fill-3 p-[3px] transition-colors duration-200 text-xl'>
                         {isLoading ? <Skeleton circle={true} height={20} width={20} /> : 
                         (
                             <>
-                                {starred ? <AiFillStar className="text-dark-yellow" /> : <TiStarOutline />}
+                                {starred && !updating ? <AiFillStar className="text-dark-yellow" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <TiStarOutline />}
                             </>
                         )}
                     </div>
