@@ -26,6 +26,14 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
     const [user] = useAuthState(auth);
     const [updating, setUpdating] = useState<boolean>(false);
 
+    const returnUserAndProblemData = async(transaction: any) => {
+        const userRef = doc(firstore, "users", user!.uid);
+        const problemRef = doc(firstore, "problems", problem.id);
+        const userDoc = await transaction.get(userRef);
+        const problemDoc = await transaction.get(problemRef);
+        return {userDoc, problemDoc, userRef, problemRef}
+    }
+
     const handleLike = async() => {
         if (!user) {
             toast.error("Please log in to like the problem", { position: "top-right", autoClose: 5000, theme: "dark", });
@@ -34,10 +42,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
         if (updating) {return;}
         setUpdating(true);
         await runTransaction(firstore, async(transaction) => {
-            const userRef = doc(firstore, "users", user.uid);
-            const problemRef = doc(firstore, "problems", problem.id);
-            const userDoc = await transaction.get(userRef);
-            const problemDoc = await transaction.get(problemRef);
+            const {userDoc, problemDoc, userRef, problemRef} = await returnUserAndProblemData(transaction);
             if (userDoc.exists() && problemDoc.exists()) {
                 if (liked) {
                     transaction.update(userRef,{
@@ -58,7 +63,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                     )
                     transaction.update(problemRef, {
                             likes: problemDoc.data().likes + 1,
-                            disliked: problemDoc.data().dislikes - 1
+                            dislikes: problemDoc.data().dislikes - 1
                         }
                     )
                     setProblemData(prev => prev ? {...prev, likes: prev.likes + 1, dislikes: prev.dislikes - 1} : null);
@@ -74,6 +79,57 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                     )
                     setProblemData(prev => prev ? {...prev, likes: prev.likes + 1} : null);
                     setUserData(prev => ({...prev, liked: true}));
+                }
+            }
+        });
+        setUpdating(false);
+    }
+
+    const handleDislike = async() => {
+        if (!user) {
+            toast.error("Please log in to dislike the problem", { position: "top-right", autoClose: 5000, theme: "dark", });
+            return;
+        }
+        if (updating) {return;}
+        setUpdating(true);
+        await runTransaction(firstore, async(transaction) => {
+            const {userDoc, problemDoc, userRef, problemRef} = await returnUserAndProblemData(transaction);
+            if (userDoc.exists() && problemDoc.exists()) {
+                if (disliked) {
+                    transaction.update(userRef,{
+                        dislikedProblems: userDoc.data().dislikedProblems.filter((id: string) => id !== problem.id)
+                    }
+                    );
+                    transaction.update(problemRef, {
+                            dislikes: problemDoc.data().dislikes - 1
+                        }
+                    )
+                    setProblemData(prev => prev ? {...prev, dislikes: prev.dislikes - 1} : null);
+                    setUserData(prev => ({...prev, disliked: false}));
+                } else if (liked) {
+                    transaction.update(userRef, {
+                            dislikedProblems: [...userDoc.data().dislikedProblems, problem.id],
+                            likedProblems: userDoc.data().likedProblems.filter((id: string) => id !== problem.id)
+                        }
+                    )
+                    transaction.update(problemRef, {
+                            likes: problemDoc.data().likes - 1,
+                            dislikes: problemDoc.data().dislikes + 1
+                        }
+                    )
+                    setProblemData(prev => prev ? {...prev, likes: prev.likes - 1, dislikes: prev.dislikes + 1} : null);
+                    setUserData(prev => ({...prev, liked: false, disliked: true}));
+                } else {
+                    transaction.update(userRef, {
+                            dislikedProblems: [...userDoc.data().dislikedProblems, problem.id]
+                        }
+                    )
+                    transaction.update(problemRef, {
+                            dislikes: problemDoc.data().dislikes + 1
+                        }
+                    )
+                    setProblemData(prev => prev ? {...prev, dislikes: prev.dislikes + 1} : null);
+                    setUserData(prev => ({...prev, disliked: true}));
                 }
             }
         });
@@ -109,10 +165,10 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                         </>
                         )}
                     </div>
-                    <div className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
+                    <div onClick={handleDislike} className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
                             <>
-                                {disliked ? <AiFillDislike className="text-dark-blue-s" /> : <AiFillDislike />}
+                                {disliked && !updating ? <AiFillDislike className="text-dark-blue-s" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <AiFillDislike />}
                                 <span className='text-xs'>{problemData?.dislikes}</span>
                             </>
                         )}
