@@ -39,7 +39,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
             toast.error("Please log in to like the problem", { position: "top-right", autoClose: 5000, theme: "dark", });
             return;
         }
-        if (updating) {return;}
+        if (updating || isLoading) {return;}
         setUpdating(true);
         await runTransaction(firstore, async(transaction) => {
             const {userDoc, problemDoc, userRef, problemRef} = await returnUserAndProblemData(transaction);
@@ -90,7 +90,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
             toast.error("Please log in to dislike the problem", { position: "top-right", autoClose: 5000, theme: "dark", });
             return;
         }
-        if (updating) {return;}
+        if (updating || isLoading) {return;}
         setUpdating(true);
         await runTransaction(firstore, async(transaction) => {
             const {userDoc, problemDoc, userRef, problemRef} = await returnUserAndProblemData(transaction);
@@ -141,7 +141,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
             toast.error("Please log in to star the problem", { position: "top-right", autoClose: 5000, theme: "dark", });
             return;
         }
-        if (updating) {return;}
+        if (updating || isLoading) {return;}
         setUpdating(true);
         if (!starred) {
             const userRef = doc(firstore, "users", user.uid);
@@ -167,8 +167,8 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
             <div className='bg-dark-layer-1 w-full p-5 overflow-y-auto rounded-e-md rounded-bl-md'>
                 <h1 className="text-white text-lg font-medium">{problem.title}</h1>
                 <div className='flex items-center mt-3 space-x-4 min-h-[40px]'>
-                    <div className={`text-xs ${problemData?.difficulty === 'Easy' ? "text-olive bg-olive" :
-                     problemData?.difficulty === 'Medium' ? "bg-dark-yellow text-dark-yellow" : problemData?.difficulty === 'Hard' ?
+                    <div className={`text-xs ${problemData?.difficulty === 'Easy' && !isLoading ? "text-olive bg-olive" :
+                     problemData?.difficulty === 'Medium' && !isLoading ? "bg-dark-yellow text-dark-yellow" : problemData?.difficulty === 'Hard' && !isLoading ?
                       "bg-dark-pink text-dark-pink" : ""} rounded-[21px] bg-opacity-[.15] ${problemData?.difficulty ? "px-2 py-1" : ""} font-medium capitalize`}>
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : problemData?.difficulty}
                     </div>
@@ -179,7 +179,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                             </div>
                         )
                     }
-                    <div onClick={handleLike} className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
+                    <div onClick={handleLike} className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 ${!isLoading ? "hover:bg-dark-fill-3" : ""} rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
                         <>
 
@@ -188,7 +188,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                         </>
                         )}
                     </div>
-                    <div onClick={handleDislike} className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 hover:bg-dark-fill-3 rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
+                    <div onClick={handleDislike} className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 ${!isLoading ? "hover:bg-dark-fill-3" : ""} rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
                             <>
                                 {disliked && !updating ? <AiFillDislike className="text-dark-blue-s" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <AiFillDislike />}
@@ -196,7 +196,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                             </>
                         )}
                     </div>
-                    <div onClick={handleStar} data-tooltip-id="my-tooltip" data-tooltip-content="Add to List" data-tooltip-place="bottom" className='text-dark-gray-6 cursor-pointer rounded hover:bg-dark-fill-3 p-[3px] transition-colors duration-200 text-xl'>
+                    <div onClick={handleStar} data-tooltip-id="my-tooltip" data-tooltip-content="Add to List" data-tooltip-place="bottom" className={`text-dark-gray-6 cursor-pointer rounded ${!isLoading ? "hover:bg-dark-fill-3" : ""} p-[3px] transition-colors duration-200 text-xl`}>
                         {isLoading ? <Skeleton circle={true} height={20} width={20} /> : 
                         (
                             <>

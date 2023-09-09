@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import React from 'react';
-import { auth } from '@/firebase/firebase';
+import React, { useEffect, useState } from 'react';
+import { auth, firstore } from '@/firebase/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import Logout from '../Buttons/Logout';
 import { useSetRecoilState } from 'recoil';
@@ -9,6 +9,9 @@ import { authModalState } from '@/atoms/authModalAtom';
 import Timer from '../Timer/Timer';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { BsList } from 'react-icons/bs';
+import { useRouter } from 'next/router';
+import { collection, orderBy, query, getDocs, where } from 'firebase/firestore';
+import { DBProblem } from '@/utils/types/problems';
 
 type TopbarProps = {
     problemPage?: boolean
@@ -18,6 +21,35 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
 
     const [user] = useAuthState(auth);
     const setModalState = useSetRecoilState(authModalState);
+    const router = useRouter();
+
+    const useGetSortedIds = () => {
+        const problems = useGetProblems();
+      
+        const ids: string[] = [];
+      
+        problems.forEach((doc:any) => {
+          ids.push(doc.id);
+        });
+      
+        return ids;
+    };
+
+    const problemIds = useGetSortedIds();
+
+    const handleSwitchProblem = (isForward: boolean) => {
+        let problemId = "";
+        const currentProblem = router.query;
+        let currProblemIndex = problemIds.indexOf(currentProblem.pid as string);
+        if (isForward) {
+            currProblemIndex === problemIds.length - 1 ? currProblemIndex = 0 : currProblemIndex++;
+            problemId = problemIds.at(currProblemIndex) as string;
+        } else {
+            currProblemIndex--;
+            problemId = problemIds.at(currProblemIndex) as string;
+        }
+        router.push(`/problems/${problemId}`);
+    }
     
     return <div className='bg-dark-layer-1 text-dark-gray-7 flex justify-between'>
         <div className={`${problemPage ? 'md:ml-0' : 'md:ml-28'}`}>
@@ -27,7 +59,7 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
         </div>
         {problemPage &&
             <div className='flex justify-center items-center gap-4'>
-                <div className='cursor-pointer p-2.5 rounded-md bg-dark-fill-3
+                <div onClick={() => handleSwitchProblem(false)} className='cursor-pointer p-2.5 rounded-md bg-dark-fill-3
                 outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>
                     <FaChevronLeft />
                 </div>
@@ -35,7 +67,7 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
                     <BsList />
                     <p className='text-sm'>Problems List</p>
                 </Link>
-                <div className='cursor-pointer p-2.5 rounded-md bg-dark-fill-3
+                <div onClick={() => handleSwitchProblem(true)} className='cursor-pointer p-2.5 rounded-md bg-dark-fill-3
                 outline-none text-sm hover:bg-dark-fill-2 transition duration-300 ease-in-out'>
                     <FaChevronRight />
                 </div>
@@ -61,3 +93,24 @@ const Topbar:React.FC<TopbarProps> = ({problemPage}) => {
     </div>
 }
 export default Topbar;
+
+function useGetProblems() {
+    const [problems, setProblems] = useState<DBProblem[]>([]);
+
+    useEffect(() => {
+
+        const getProblems = async () => {
+            const q = query(collection(firstore, "problems"), where('link', '==', ''), orderBy("order", "asc"));
+            const querySnapshot = await getDocs(q);
+            const temp: DBProblem[] = []
+            querySnapshot.forEach((doc) => {
+                temp.push({id: doc.id, ...doc.data()} as DBProblem)
+            });
+            setProblems(temp);
+        }
+
+        getProblems();
+    }, [])
+
+    return problems;
+}
