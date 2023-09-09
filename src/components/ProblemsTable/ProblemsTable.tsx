@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { IoClose } from 'react-icons/io5';
 import YouTube from 'react-youtube';
 import Skeleton from 'react-loading-skeleton'
-import { collection, orderBy, query, getDocs } from 'firebase/firestore';
-import { firstore } from '@/firebase/firebase'
+import { collection, orderBy, query, getDocs, doc, getDoc } from 'firebase/firestore';
+import { auth, firstore } from '@/firebase/firebase'
 import { DBProblem } from '@/utils/types/problems'
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 type ProblemsTableProps = {
     
@@ -19,6 +20,7 @@ const ProblemsTable:React.FC<ProblemsTableProps> = () => {
 		isOpen: false,
 		videoId: "",
 	});
+    const [user] = useAuthState(auth);
 
     const closeModal = () => {
 		setYoutubePlayer({ isOpen: false, videoId: "" });
@@ -29,7 +31,7 @@ const ProblemsTable:React.FC<ProblemsTableProps> = () => {
     }
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const problems = useGetProblems(setIsLoading);
+    const {problems, userSolvedProblems} = useGetProblemsAndUserData(setIsLoading);
     
     return <>
         <tbody className='text-white'>
@@ -49,7 +51,7 @@ const ProblemsTable:React.FC<ProblemsTableProps> = () => {
                 return (
                     <tr key={problem.id} className={`${idx % 2 == 1 ? "bg-dark-layer-1" : ""}`}>
                         <th className='px-2 py-4 font-medium whitespace-nowrap text-dark-green-s'>
-                            <BsCheckCircle fontSize={"18"} width='18' />
+                            {user && userSolvedProblems?.includes(problem.id) && <BsCheckCircle fontSize={"18"} width='18' />}
                         </th>
                         <td className='px-6 py-4'>
                             <Link className='hover:text-blue-600 cursor-pointer' href={`${problem.link ? problem.link : '/problems/' + problem.id}`}>
@@ -96,13 +98,14 @@ const ProblemsTable:React.FC<ProblemsTableProps> = () => {
 }
 export default ProblemsTable;
 
-function useGetProblems(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) {
+function useGetProblemsAndUserData(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>) {
     const [problems, setProblems] = useState<DBProblem[]>([]);
+    const [userSolvedProblems, setUserSolvedProblems] = useState<string[]>();
+    const [user] = useAuthState(auth);
 
     useEffect(() => {
-
+        setIsLoading(true)
         const getProblems = async () => {
-            setIsLoading(true)
             const q = query(collection(firstore, "problems"), orderBy("order", "asc"));
             const querySnapshot = await getDocs(q);
             const temp: DBProblem[] = []
@@ -110,11 +113,23 @@ function useGetProblems(setIsLoading: React.Dispatch<React.SetStateAction<boolea
                 temp.push({id: doc.id, ...doc.data()} as DBProblem)
             });
             setProblems(temp);
-            setIsLoading(false);
         }
 
-        getProblems();
-    }, [setIsLoading])
+        const getUserData = async () => {
+            if (user) {
+                const docRef = doc(firstore, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                  const data = docSnap.data();
+                  setUserSolvedProblems(data.solvedProblems)
+                }
+            }
+        }
 
-    return problems;
+        Promise.all([getProblems(), getUserData()]).then(() => {
+            setIsLoading(false);
+        });
+    }, [setIsLoading, user])
+
+    return {problems, userSolvedProblems};
 }
