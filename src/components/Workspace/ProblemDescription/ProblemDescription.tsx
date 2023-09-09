@@ -14,17 +14,30 @@ import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
 
 type ProblemDescriptionProps = {
-    problem: Problem
+    problem: Problem,
+    setSuccess: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
+const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem, setSuccess}) => {
 
     const [isConsoleOpen, setConsoleOpen] = useState<boolean>(true);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const {problemData, setProblemData} = useGetProblemData(setIsLoading, problem.id);
-    const {liked, disliked, starred, solved, setUserData} = useGetUserActions(setIsLoading, problem.id);
+    const {problemData, setProblemData, loadProblemData} = useGetProblemData(problem.id);
+    const {liked, disliked, starred, solved, setUserData, loadUserData} = useGetUserActions(problem.id);
     const [user] = useAuthState(auth);
     const [updating, setUpdating] = useState<boolean>(false);
+
+    useEffect(() => {
+        setIsLoading(true);
+      
+        Promise.all([
+          loadUserData(),
+          loadProblemData()
+        ]).then(() => {
+          setIsLoading(false);
+        });
+      
+    }, [problem.id]);
 
     const returnUserAndProblemData = async(transaction: any) => {
         const userRef = doc(firstore, "users", user!.uid);
@@ -173,7 +186,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : problemData?.difficulty}
                     </div>
                     {isLoading ? <Skeleton circle={true} height={20} width={20} /> : 
-                        (solved && 
+                        (solved && user &&
                             <div data-tooltip-id="my-tooltip" data-tooltip-content="Solved" data-tooltip-place="bottom" className='rounded transition-colors duration-200 text-green-s text-dark-green-s text-lg'>
                                 <BsCheck2Circle />
                             </div>
@@ -183,7 +196,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
                         <>
 
-                            {liked && !updating ? <AiFillLike className="text-dark-blue-s" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <AiFillLike />}
+                            {liked && !updating && user ? <AiFillLike className="text-dark-blue-s" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <AiFillLike />}
                             <span className='text-xs'>{problemData?.likes}</span>
                         </>
                         )}
@@ -191,7 +204,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                     <div onClick={handleDislike} className={`flex items-center space-x-1 cursor-pointer text-dark-gray-6 ${!isLoading ? "hover:bg-dark-fill-3" : ""} rounded p-[3px] transition-colors duration-200 text-lg ${isLoading ? "mb-1" : ""}`}>
                         {isLoading ? <Skeleton width={40} height={25} borderRadius={20}/> : (
                             <>
-                                {disliked && !updating ? <AiFillDislike className="text-dark-blue-s" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <AiFillDislike />}
+                                {disliked && !updating && user ? <AiFillDislike className="text-dark-blue-s" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <AiFillDislike />}
                                 <span className='text-xs'>{problemData?.dislikes}</span>
                             </>
                         )}
@@ -200,7 +213,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                         {isLoading ? <Skeleton circle={true} height={20} width={20} /> : 
                         (
                             <>
-                                {starred && !updating ? <AiFillStar className="text-dark-yellow" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <TiStarOutline />}
+                                {starred && !updating && user ? <AiFillStar className="text-dark-yellow" /> : updating ? <AiOutlineLoading3Quarters className="animate-spin" /> : <TiStarOutline />}
                             </>
                         )}
                     </div>
@@ -236,53 +249,56 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem}) => {
                     </ul>
                 </div>
             </div>
-            <Console problem={problem} setConsoleOpen={setConsoleOpen}/>
+            <Console problem={problem} setConsoleOpen={setConsoleOpen} setSuccess={setSuccess} setUserData={setUserData}/>
         </Split>
     </div>
 }
 export default ProblemDescription;
 
-function useGetProblemData(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, problemId: string) {
-    const [problemData, setProblemData] = useState<DBProblem | null>();
-
+function useGetProblemData(problemId: string) {
+    const [problemData, setProblemData] = useState<DBProblem | null>(null);
+  
+    const loadProblemData = async () => {
+      const docRef = doc(firstore, "problems", problemId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const problem = docSnap.data();
+        setProblemData({id: docSnap.id, ...docSnap.data()} as DBProblem);
+      }
+    };
+  
     useEffect(() => {
-        const getCurrentProblem = async () => {
-            setIsLoading(true);
-            const docRef = doc(firstore, "problems", problemId);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const problem = docSnap.data();
-                setProblemData({id: docSnap.id, ...docSnap.data()} as DBProblem);
-            }
-        }
-        getCurrentProblem();
-    }, [problemId, setIsLoading]);
-
-    return {problemData, setProblemData};
-}
-
-function useGetUserActions(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, problemId: string) {
+      loadProblemData();
+    }, [problemId]);
+  
+    return {problemData, setProblemData, loadProblemData};
+  }
+  
+  function useGetUserActions(problemId: string) {
     const [userData, setUserData] = useState({liked: false, disliked: false, starred: false, solved: false});
     const [user] = useAuthState(auth);
-
-    useEffect(() => {
-        const getUserData = async () => {
-
-            const docRef = doc(firstore, "users", user!.uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setUserData({
-                    liked: data.likedProblems.includes(problemId),
-                    disliked: data.dislikedProblems.includes(problemId),
-                    starred: data.starredProblems.includes(problemId),
-                    solved: data.solvedProblems.includes(problemId)
-                });
-            }
-            setIsLoading(false);
+  
+    const loadUserData = async () => {
+        if (user) {
+          const docRef = doc(firstore, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setUserData({
+              liked: data.likedProblems.includes(problemId),
+              disliked: data.dislikedProblems.includes(problemId),
+              starred: data.starredProblems.includes(problemId),
+              solved: data.solvedProblems.includes(problemId)
+            });
+          }
         }
-        if (user) getUserData();
-    }, [problemId, setIsLoading, user])
-
-    return {...userData, setUserData};
-}
+    };
+      
+  
+    useEffect(() => {
+      if (user) loadUserData();
+    }, [problemId, user]);
+  
+    return {...userData, setUserData, loadUserData};
+  }
+  

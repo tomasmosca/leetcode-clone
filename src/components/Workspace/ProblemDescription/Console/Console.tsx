@@ -1,15 +1,60 @@
 import React, { useState } from 'react';
 import { BsChevronDown } from 'react-icons/bs';
 import { Problem } from '@/utils/types/problems'
+import { problems } from '@/utils/problems';
+import { useRouter } from 'next/router';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, firstore } from '@/firebase/firebase';
+import { toast } from 'react-toastify';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 
 type ConsoleProps = {
     problem: Problem,
-    setConsoleOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setConsoleOpen: React.Dispatch<React.SetStateAction<boolean>>,
+    setSuccess: React.Dispatch<React.SetStateAction<boolean>>,
+    setUserData: React.Dispatch<React.SetStateAction<{ liked: boolean; disliked: boolean; starred: boolean; solved: boolean; }>>
 };
 
-const Console:React.FC<ConsoleProps> = ({ problem, setConsoleOpen }) => {
+const Console:React.FC<ConsoleProps> = ({ problem, setConsoleOpen, setSuccess, setUserData }) => {
 
     const [testIndex, setTestIndex] = useState<number>(0);
+    const {query: {pid}} = useRouter();
+    const [user] = useAuthState(auth);
+
+    const handleSubmit = async() => {
+        if (!user) {
+            toast.error("Please log in to submit code", { position: "top-right", autoClose: 5000, theme: "dark", });
+            return;
+        }
+        try {
+            let userCode: string = localStorage.getItem(user.uid + problem.id) ? JSON.parse(localStorage.getItem(user.uid + problem.id) as string) : problem.starterCode;
+            if (userCode) userCode = problem.starterFunctionName + userCode.split(problem.starterFunctionName)[1];
+            const cb = new Function(`return ${userCode}`)();
+            const handler = problems[pid as string].handlerFunction;
+
+            if (typeof handler === "function") {
+                const result = handler(cb);
+                if (result) {
+                    toast.success("Congrats! All test cases passed!", { position: "top-right", autoClose: 5000, theme: "dark", });
+                    setSuccess(true);
+                    setTimeout(() => {setSuccess(false)}, 4000)
+    
+                    const userRef = doc(firstore, "users", user.uid);
+                    await updateDoc(userRef, {
+                        solvedProblems: arrayUnion(problem.id)
+                    });
+                    setUserData(prev => ({...prev, solved: true}));
+                }
+            }
+        } catch (error:any) {
+            console.log(error.message);
+            if (error.message.startsWith("AssertionError")) {
+                toast.error("One or more test cases failed!", { position: "top-right", autoClose: 5000, theme: "dark", });
+            } else {
+                toast.error(error.message, { position: "top-right", autoClose: 5000, theme: "dark", });
+            }
+        }
+    }
     
     return (
         <div className='flex flex-col w-full px-5 overflow-auto bg-dark-layer-1 rounded-md'>
@@ -56,7 +101,7 @@ const Console:React.FC<ConsoleProps> = ({ problem, setConsoleOpen }) => {
                         <div className='transition-all cursor-pointer rounded-lg bg-dark-fill-3 hover:bg-dark-fill-2 text-dark-label-2 text-sm font-medium px-4 py-1.5'>
                             Run
                         </div>
-                        <div className='transition-all cursor-pointer rounded-lg bg-dark-green-s hover:bg-green-400 text-white text-sm font-medium px-4 py-1.5'>
+                        <div onClick={handleSubmit} className='transition-all cursor-pointer rounded-lg bg-dark-green-s hover:bg-green-400 text-white text-sm font-medium px-4 py-1.5'>
                             Submit
                         </div>
                     </div>
