@@ -7,7 +7,7 @@ export default function Home() {
 
   if (!hasMounted) return null;
   return (
-      <main className="bg-dark-layer-2 min-h-screen">
+      <div className="bg-dark-layer-2 min-h-screen relative">
         <Topbar />
         <h1 className="text-gray-400 text-2xl text-center font-medium mt-10 mb-5">Coding Problems</h1>
         <div className="relative overflow-x-auto mx-auto px-6 pb-10">
@@ -24,6 +24,6 @@ export default function Home() {
             <ProblemsTable />
           </table>
         </div>
-      </main>
+      </div>
   )
 }

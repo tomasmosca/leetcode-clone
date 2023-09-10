@@ -21,9 +21,9 @@ export default function App({ Component, pageProps }: AppProps) {
 			<div className='app-wrapper'>
 				<SkeletonTheme baseColor="#313131" highlightColor="#525252">
 					<Component {...pageProps} />
-					<ToastContainer/>
 					<Tooltip id="my-tooltip" className='tooltip-styling' arrowColor="transparent" offset={8}/>
 				</SkeletonTheme>
+				<ToastContainer/>
 			</div>
  		</RecoilRoot>
 }
