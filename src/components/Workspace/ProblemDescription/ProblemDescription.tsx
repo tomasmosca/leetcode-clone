@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from 'react';
 import { AiFillDislike, AiFillLike, AiFillStar, AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BsCheck2Circle } from 'react-icons/bs';
@@ -37,6 +38,7 @@ const ProblemDescription:React.FC<ProblemDescriptionProps> = ({problem, setSucce
           setIsLoading(false);
         });
       
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [problem.id]);
 
     const returnUserAndProblemData = async(transaction: any) => {
@@ -269,6 +271,7 @@ function useGetProblemData(problemId: string) {
   
     useEffect(() => {
       loadProblemData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [problemId]);
   
     return {problemData, setProblemData, loadProblemData};
@@ -297,6 +300,7 @@ function useGetProblemData(problemId: string) {
   
     useEffect(() => {
       if (user) loadUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [problemId, user]);
   
     return {...userData, setUserData, loadUserData};

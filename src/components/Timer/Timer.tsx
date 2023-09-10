@@ -70,7 +70,7 @@ const Timer:React.FC<TimerProps> = () => {
                         <FiRefreshCcw />
                     </div>
                 </div> : 
-                <div data-tooltip-id="my-tooltip" data-tooltip-content={`${timerStarted ? 'Show timer' : 'Start timer'}`} data-tooltip-place="bottom" className={`cursor-pointer p-1.5 rounded-md ${timerStarted ? 'text-dark-blue-s' : ''} outline-none text-sm hover:bg-dark-fill-2 transition-all duration-300 ease-in-out transition-text-none`}>
+                <div data-tooltip-id="my-tooltip" data-tooltip-content={`${timerStarted ? 'Show timer' : 'Start timer'}`} data-tooltip-place="bottom" className={`cursor-pointer p-1.5 rounded-md ${timerStarted ? 'text-dark-blue-s' : ''} outline-none text-sm hover:bg-dark-fill-2 duration-300 ease-in-out transition-text-none`}>
                     <svg
                         xmlns='http://www.w3.org/2000/svg'
                         viewBox='0 0 24 24'
