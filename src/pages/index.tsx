@@ -1,6 +1,7 @@
 import ProblemsTable from "@/components/ProblemsTable/ProblemsTable";
 import Topbar from "@/components/Topbar/Topbar";
 import useHasMounted from "@/hooks/useHasMounted";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Home() {
   const hasMounted = useHasMounted();
