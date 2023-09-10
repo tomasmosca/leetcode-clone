@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Split from 'react-split';
 import ProblemDescription from './ProblemDescription/ProblemDescription';
 import Playground from './Playground/Playground';
@@ -12,6 +12,20 @@ type WorkspaceProps = {
 const Workspace:React.FC<WorkspaceProps> = ({problem}) => {
 
     const [success, setSuccess] = useState<boolean>(false);
+    const [height, setHeight] = useState('567px');
+
+    useEffect(() => {
+        const updateHeight = () => {
+            setHeight(`${window.innerHeight}px`);
+        };
+
+        updateHeight();
+        window.addEventListener('resize', updateHeight);
+
+        return () => {
+            window.removeEventListener('resize', updateHeight);
+        };
+    }, []);
     
     return (<>
             <Split className='split' minSize={400}>
@@ -21,6 +35,7 @@ const Workspace:React.FC<WorkspaceProps> = ({problem}) => {
             {success && <Confetti 
                 gravity={0.3}
                 tweenDuration={4000}
+                height={height as unknown as number}
             />}
         </>
     );

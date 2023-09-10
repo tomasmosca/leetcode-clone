@@ -15,6 +15,7 @@ const Playground:React.FC<PlaygroundProps> = ({ problem }) => {
 
     const [userCode, setUserCode] = useState<string>();
     const [user] = useAuthState(auth);
+    const [height, setHeight] = useState('567px'); // default height
 
     useEffect(() => {
         if (user) {
@@ -29,6 +30,19 @@ const Playground:React.FC<PlaygroundProps> = ({ problem }) => {
             localStorage.setItem(user.uid + problem.id, JSON.stringify(value));
         }
     }
+
+    useEffect(() => {
+        const updateHeight = () => {
+            setHeight(`${window.innerHeight - 125}px`);
+        };
+
+        updateHeight();
+        window.addEventListener('resize', updateHeight);
+
+        return () => {
+            window.removeEventListener('resize', updateHeight);
+        };
+    }, []);
     
     return <div className='flex flex-col relative mr-2'>
             <PreferenceNav />
@@ -38,8 +52,8 @@ const Playground:React.FC<PlaygroundProps> = ({ problem }) => {
                     theme={vscodeDark}
                     extensions={[javascript()]}
                     style={{fontSize:16}}
-                    height='565px'
                     onChange={onCodeChange}
+                    height={height}
                 />
             </div>
         </div>
