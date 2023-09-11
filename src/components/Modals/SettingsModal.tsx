@@ -13,15 +13,11 @@ type SettingsModalProps = {
 const SettingsModal:React.FC<SettingsModalProps> = ({ setSettings, settings }) => {
 
     const [fontSize, setFontSize] = useState<string>()
-    const [tempModal, setTempModal] = useState<boolean>(false);
+    const [tempModal, setTempModal] = useState<boolean>(true);
 
     useEffect(() => {
         setFontSize(localStorage.getItem("lcc-fontSize") ? localStorage.getItem("lcc-fontSize") as string : "16px")
-    }, [setSettings])
-
-    useEffect(() => {
-        setTempModal(settings.isModalOpen)
-    }, [settings.isModalOpen])
+    }, [])
 
     const handleCloseModal = () => {
         setTempModal(false);
