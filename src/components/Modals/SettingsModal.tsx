@@ -13,13 +13,21 @@ type SettingsModalProps = {
 const SettingsModal:React.FC<SettingsModalProps> = ({ setSettings, settings }) => {
 
     const [fontSize, setFontSize] = useState<string>()
+    const [tempModal, setTempModal] = useState<boolean>(false);
 
     useEffect(() => {
         setFontSize(localStorage.getItem("lcc-fontSize") ? localStorage.getItem("lcc-fontSize") as string : "16px")
     }, [setSettings])
 
+    useEffect(() => {
+        setTempModal(settings.isModalOpen)
+    }, [settings.isModalOpen])
+
     const handleCloseModal = () => {
-        setSettings(prev => ({...prev, isModalOpen: false, isDropdownOpen: false}))
+        setTempModal(false);
+        setTimeout(() => {
+            setSettings(prev => ({...prev, isModalOpen: false, isDropdownOpen: false}))
+        }, 300)
     }
     
     return <>
@@ -28,12 +36,12 @@ const SettingsModal:React.FC<SettingsModalProps> = ({ setSettings, settings }) =
                     <div className='flex min-h-screen items-center justify-center px-4'>
                         {/* overlay */}
                         <div
-                            className='opacity-100'
+                            className={`opacity-100 ${tempModal ? "overlay-enter" : "overlay-close"}`}
                         >
                             <div className='fixed inset-0 bg-gray-8 opacity-60'></div>
                         </div>
 
-                        <div className='my-8 inline-block min-w-full transform rounded-[13px] text-left transition-all bg-overlay-3 md:min-w-[420px] shadow-level4 shadow-lg p-0 bg-[rgb(40,40,40)] w-[600px] !overflow-visible opacity-100 scale-100'>
+                        <div className={`${tempModal ? "settings-modal-enter" : "settings-modal-close"} my-8 inline-block min-w-full transform rounded-[13px] text-left transition-all bg-overlay-3 md:min-w-[420px] shadow-level4 shadow-settings-modal p-0 bg-[rgb(40,40,40)] w-[600px] !overflow-visible opacity-100 scale-100`}>
                             {/* setting header */}
                             <div className='flex items-center border-b px-5 py-4 text-lg font-medium  border-dark-divider-border-2'>
                                 Settings

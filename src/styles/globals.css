@@ -38,19 +38,57 @@ body {
     }
 }
 
+@keyframes scaleIn {
+    from {
+        transform: scale(95%);
+        opacity: 0;
+    }
+    to {
+        transform: scale(100%);
+        opacity: 1;
+    }
+}
+
+@keyframes scaleOut {
+    from {
+        transform: scale(100%);
+        opacity: 1;
+    }
+    to {
+        transform: scale(95%);
+        opacity: 0;
+    }
+}
+
 
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 0.60; }
 }
+
+@keyframes fadeOut {
+    from { opacity: 0.60; }
+    to { opacity: 0; }
+}
   
 .overlay-enter {
     animation: fadeIn 0.3s forwards;
 }
-  
 
+.overlay-close {
+    animation: fadeOut 0.3s forwards;
+}
+  
 .modal-enter {
     animation: slideUp 0.3s forwards;
+}
+
+.settings-modal-enter {
+    animation: scaleIn 0.3s ease-in-out;
+}
+
+.settings-modal-close {
+    animation: scaleOut 0.3s ease-in-out;
 }
 
 /* dark  scrollbar */
@@ -60,6 +98,7 @@ body {
 
 ::-webkit-scrollbar-track {
 	background: #282828;
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -149,3 +188,8 @@ code {
     }
 }
   
+.shadow-settings-modal {
+    --tw-shadow: 0px 1px 3px #0000003d,0px 10px 28px -4px #0000007a;
+    --tw-shadow-colored: 0px 1px 3px var(--tw-shadow-color),0px 10px 28px -4px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow);
+}
