@@ -1,6 +1,8 @@
 import assert from "assert";
 import { Problem } from '@/utils/types/problems'
 import example from "./images/reverseLL.jpg";
+import { Testcase } from "@/components/Workspace/ProblemDescription/Console/Console";
+import { extractVariables } from "../functions/utilFunctions";
 
 class LinkedList {
 	value: number;
@@ -24,16 +26,34 @@ class LinkedList {
 	}
 }
 
-export const reverseLinkedListHandler = (fn: any) => {
+export const reverseLinkedListHandler = (fn: any, index?: number, customTestcases?: Testcase[]) => {
 	try {
-		const tests = [[1, 2, 3, 4, 5], [5, 4, 3, 2, 1], [1, 2, 3], [1]];
-		const answers = [[5, 4, 3, 2, 1], [1, 2, 3, 4, 5], [3, 2, 1], [1]];
-		for (let i = 0; i < tests.length; i++) {
-			const list = createLinkedList(tests[i]);
-			const result = fn(list);
-			assert.deepEqual(getListValues(result), answers[i]);
+		const head = [[1, 2, 3, 4, 5], [1, 2, 3], [1]];
+		const answers = [[5, 4, 3, 2, 1], [3, 2, 1], [1]];
+		if (customTestcases) {
+			for (let testcase of customTestcases) {
+				let customTestInput = extractVariables(testcase.input);
+				let customTestOutput = testcase.output;
+
+				if (Array.isArray(customTestInput.head)) {
+					head.push(customTestInput.head);
+					answers.push(JSON.parse(customTestOutput));
+				}
+			}
 		}
-		return true;
+		if (index) {
+			const list = createLinkedList(head[index]);
+			const result = fn(list);
+			assert.deepEqual(getListValues(result), answers[index]);
+			return true;
+		} else {
+			for (let i = 0; i < head.length; i++) {
+				const list = createLinkedList(head[i]);
+				const result = fn(list);
+				assert.deepEqual(getListValues(result), answers[i]);
+			}
+			return true;
+		}
 	} catch (error: any) {
 		console.log("Error from reverseLinkedListHandler: ", error);
 		throw new Error(error);

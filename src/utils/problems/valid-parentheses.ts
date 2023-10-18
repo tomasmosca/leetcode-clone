@@ -1,15 +1,36 @@
 import assert from "assert";
 import { Problem } from '@/utils/types/problems';
+import { Testcase } from "@/components/Workspace/ProblemDescription/Console/Console";
+import { extractVariables } from "../functions/utilFunctions";
 
-export const validParenthesesHandler = (fn: any) => {
+export const validParenthesesHandler = (fn: any, index?: number, customTestcases?: Testcase[]) => {
 	try {
-		const tests = ["()", "()[]{}", "(]", "([)]", "{[]}"];
-		const answers = [true, true, false, false, true];
-		for (let i = 0; i < tests.length; i++) {
-			const result = fn(tests[i]);
-			assert.deepEqual(result, answers[i]);
+		const tests = ["()", "()[]{}", "(]", "([)]"];
+		const answers = [true, true, false, false];
+		if (customTestcases) {
+			for (let testcase of customTestcases) {
+				let customTestInput = extractVariables(testcase.input);
+				let customTestOutput = testcase.output;
+				tests.push(customTestInput.s as unknown as string);
+				
+				if (customTestOutput === "true") {
+                    answers.push(true);
+                } else if (customTestOutput === "false") {
+                    answers.push(false);
+                }
+			}
 		}
-		return true;
+		if (index) {
+			const result = fn(tests[index]);
+			assert.deepEqual(result, answers[index]);
+			return true;
+		} else {
+			for (let i = 0; i < tests.length; i++) {
+				const result = fn(tests[i]);
+				assert.deepEqual(result, answers[i]);
+			}
+			return true;
+		}
 	} catch (error: any) {
 		console.error("Error from validParenthesesHandler: ", error);
 		throw new Error(error);

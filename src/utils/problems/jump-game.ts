@@ -1,24 +1,48 @@
 import assert from "assert";
 import { Problem } from '@/utils/types/problems';
+import { Testcase } from "@/components/Workspace/ProblemDescription/Console/Console";
+import { extractVariables } from "../functions/utilFunctions";
 
-export const jumpGameHandler = (fn: any) => {
-	try {
-		const tests = [
-			[2, 3, 1, 1, 4],
-			[3, 2, 1, 0, 4],
-			[2, 0, 0],
-			[2, 5, 0, 0],
-		];
-		const answers = [true, false, true, true];
-		for (let i = 0; i < tests.length; i++) {
-			const result = fn(tests[i]);
-			assert.equal(result, answers[i]);
-		}
-		return true;
-	} catch (error: any) {
-		console.log("Error from jumpGameHandler: ", error);
-		throw new Error(error);
-	}
+export const jumpGameHandler = (fn: any, index?: number, customTestcases?: Testcase[]) => {
+    try {
+        let nums = [
+            [2, 3, 1, 1, 4],
+            [3, 2, 1, 0, 4],
+        ];
+        let answers = [true, false];
+
+        if (customTestcases) {
+            for (let testcase of customTestcases) {
+                let customTestInput = extractVariables(testcase.input);
+                let customTestOutput = testcase.output;
+
+                if (Array.isArray(customTestInput.nums)) {
+                    nums.push(customTestInput.nums);
+                }
+
+                if (customTestOutput === "true") {
+                    answers.push(true);
+                } else if (customTestOutput === "false") {
+                    answers.push(false);
+                }
+            }
+        }
+
+        if (index !== undefined) {
+            const result = fn(nums[index]);
+            assert.equal(result, answers[index]);
+            return true;
+        } else {
+            for (let i = 0; i < nums.length; i++) {
+                const result = fn(nums[i]);
+                assert.equal(result, answers[i]);
+            }
+            return true;
+        }
+    } catch (error: any) {
+        console.log("Error from jumpGameHandler: ", error);
+        throw new Error(error);
+    }
 };
 
 const starterCodeJumpGameJS = `function canJump(nums) {

@@ -1,12 +1,14 @@
 import assert from "assert";
 import { Problem } from '@/utils/types/problems'
+import { Testcase } from "@/components/Workspace/ProblemDescription/Console/Console";
+import { extractVariables } from "../functions/utilFunctions";
 
 const starterCodeTwoSum = `function twoSum(nums,target){
     // Write your code here
 };`;
 
 // checks if the user has the correct code
-const handlerTwoSum = (fn: any) => {
+const handlerTwoSum = (fn: any, index?: number, customTestcases?: Testcase[]) => {
 	// fn is the callback that user's code is passed into
 	try {
 		const nums = [
@@ -21,14 +23,29 @@ const handlerTwoSum = (fn: any) => {
 			[1, 2],
 			[0, 1],
 		];
-
-		// loop all tests to check if the user's code is correct
-		for (let i = 0; i < nums.length; i++) {
-			// result is the output of the user's function and answer is the expected output
-			const result = fn(nums[i], targets[i]);
-			assert.deepStrictEqual(result, answers[i]);
+		if (customTestcases) {
+			for(let testcase of customTestcases) {
+				let customTestInput = extractVariables(testcase.input);
+				const answer = testcase.output
+				nums.push(customTestInput.nums)
+				targets.push(customTestInput.target)
+				answers.push(JSON.parse(answer))
+			}
 		}
-		return true;
+
+		if (index) {
+			const result = fn(nums[index], targets[index]);
+			assert.deepStrictEqual(result, answers[index]);
+			return true;
+		} else {
+			// loop all tests to check if the user's code is correct
+			for (let i = 0; i < nums.length; i++) {
+				// result is the output of the user's function and answer is the expected output
+				const result = fn(nums[i], targets[i]);
+				assert.deepStrictEqual(result, answers[i]);
+			}
+			return true;
+		}
 	} catch (error: any) {
 		console.log("twoSum handler function error");
 		throw new Error(error);

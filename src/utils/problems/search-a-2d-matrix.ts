@@ -2,8 +2,10 @@ import assert from "assert";
 import { Problem } from '@/utils/types/problems';
 import example1 from "./images/search-a-2d-1.jpg";
 import example2 from "./images/search-a-2d-2.jpg";
+import { Testcase } from "@/components/Workspace/ProblemDescription/Console/Console";
+import { extractVariables } from "../functions/utilFunctions";
 
-export const search2DMatrixHandler = (fn: any) => {
+export const search2DMatrixHandler = (fn: any, index?: number, customTestcases?: Testcase[]) => {
 	try {
 		const tests = [
 			{
@@ -22,13 +24,38 @@ export const search2DMatrixHandler = (fn: any) => {
 				],
 				target: 13,
 			},
+			{
+				matrix: [
+					[1],
+				],
+				target: 1,
+			},
 		];
-		const answers = [true, false];
-		for (let i = 0; i < tests.length; i++) {
-			const result = fn(tests[i].matrix, tests[i].target);
-			assert.deepEqual(result, answers[i]);
+		const answers = [true, false, true];
+		if (customTestcases) {
+			for (let testcase of customTestcases) {
+				let customTestInput = extractVariables(testcase.input);
+				let customTestOutput = testcase.output;
+
+				tests.push(customTestInput as { matrix: number[][]; target: number; })
+				if (customTestOutput === "true") {
+                    answers.push(true);
+                } else if (customTestOutput === "false") {
+                    answers.push(false);
+                }
+			}
 		}
-		return true;
+		if (index) {
+			const result = fn(tests[index].matrix, tests[index].target);
+			assert.deepEqual(result, answers[index]);
+			return true;
+		} else {
+			for (let i = 0; i < tests.length; i++) {
+				const result = fn(tests[i].matrix, tests[i].target);
+				assert.deepEqual(result, answers[i]);
+			}
+			return true;
+		}
 	} catch (error: any) {
 		console.log("Error from searchA2DMatrixHandler: ", error);
 		throw new Error(error);

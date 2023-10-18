@@ -1,3 +1,5 @@
+import { Testcase } from "@/components/Workspace/ProblemDescription/Console/Console";
+
 export type Example = {
 	id: number;
 	inputText: string;
@@ -15,7 +17,7 @@ export type Problem = {
 	constraints: string;
 	order: number;
 	starterCode: string;
-	handlerFunction: ((fn: any) => boolean) | string;
+	handlerFunction: ((fn: any, index?: number, customTestCase?: Testcase[]) => boolean) | string;
 	starterFunctionName: string;
 };
 
